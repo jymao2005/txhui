@@ -4,8 +4,8 @@
             <span>{{formatTS(post.ts)}}</span>
             <router-link :to="`/u/${post.creator}`" style="margin-left:2em">{{post.creatorName}}</router-link>     
         </header>
-        <p v-html="post.html" style="font-size:1rem"></p>
-        <footer style="color:grey;font-style:italic">
+        <div class="post-content" v-html="post.html" style="font-size:1rem"></div>
+        <footer style="color:grey;font-style:italic;border-bottom:1px dashed lightgrey">
             <span style="margin-right:1em">{{createdAt}}</span>
             <ButtonGroup>
                 <Button v-for="cmd in cmds"
@@ -27,6 +27,16 @@
                         ></CommentDialog>
     </div>
 </template>
+
+<style lang="stylus" scoped>
+    .el-button:not(:hover)
+        color:grey
+    
+    .post-content
+        padding:.5em 0 1em;
+        line-height:1.6;
+        
+</style>
 
 <script>
     import CommentDialog from "./comment-dialog.vue"

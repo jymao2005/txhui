@@ -31,7 +31,10 @@
                 <ul class='list-inline group-item' :key="_id">
                     <li><router-link :to='`/group/${id}`' :title="name">{{name}}</router-link></li>
                     <li v-if="creator && creator.name">
-                        <router-link :to="`/u/${creator._id}`">{{creator.name}}</router-link>
+                        <router-link :to="`/u/${creator._id}`">
+                            <img :src="creator.figureUrl" width="16px" height="16px" style="vertical-align:middle;margin-right:.5rem"/>
+                            <span style="vertical-align:middle" >{{creator.name}}</span>
+                        </router-link>
                     </li>
                     <li v-if="members" @click="$router.push('/group/'+id)" >
                         <Tag class='pull-right'  
@@ -42,7 +45,7 @@
             </li>
         </transition-group>
         <footer>
-            <Button :plain="true" style="width:100%">还没有你在学习的? 发起一个同学会</Button>
+            <Button type="success"  style="width:100%" @click="createGroup">没有找到你在学习的? 发起一个同学会</Button>
         </footer>
     </div>
 </template>
@@ -94,15 +97,17 @@
 </style>
 
 <script type="text/javascript">
+    import {mapState} from "vuex";
+    
     export default {
         data(){
             return {
-                groupList:[]
-                , groupName:""
+                 groupName:""
                 , creatorName:""
             }
         },
         computed:{
+             ...mapState("group/", ["groupList"]),
              filteredList(){
                 var filtered = this.groupList;
                 
@@ -120,23 +125,16 @@
                 return filtered;
             }
         },
-        created(){
+        async created(){
             var loadingInstance = this.$loading();
-            this.$http.get("/g/Group")
-            .query({
-                limit:1000
-                , populate:{
-                    path:"creator",
-                    select:"name figureUrl"
-                }
-                
-            })
-            .then((res)=>{
-                this.groupList = res.body;
-                loadingInstance.close();
-            }, (err)=>{
-                console.error(err)
-            })
+            await this.$store.dispatch("group/loadGroupList");
+            loadingInstance.close();
+        }
+        ,methods:{
+            async createGroup(){
+                await this.$store.dispatch('user/ensureLogin')
+                this.$store.commit("group/createGroup")
+            }
         }
     }
     

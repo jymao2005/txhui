@@ -17,6 +17,10 @@
 <style lang="stylus">
     .hero
         padding:1em 1em 2em;
+        
+        blockquote
+            color: darken(#42d885, 30%)
+
 </style>
 
 <script type="text/javascript">

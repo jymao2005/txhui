@@ -1,7 +1,15 @@
 <template>
-    <keep-alive exclude="Group">
-        <router-view></router-view>
-    </keep-alive>
+    <div>
+        <keep-alive exclude="Group, User">
+            <router-view></router-view>
+        </keep-alive>
+        
+        <Login></Login>    
+        <Register></Register>
+        <CreateGroup></CreateGroup>
+        <Sidebar></Sidebar>
+    </div>
+
 </template>
 
 
@@ -9,6 +17,7 @@
     * 
         box-sizing:border-box;
     
+        
     .fa-icon
         padding:.5em;
     
@@ -83,11 +92,26 @@
         list-style:none;
         margin:0;
         padding:0;
+
+    .el-popover
+        max-width:650px;
         
 </style>
 
 <script type="text/javascript">
+    import Login from "./components/common/Login.vue";
+    import Register from "./components/common/Register.vue";
+    import CreateGroup from "./components/common/CreateGroup.vue";
+    import Sidebar from "./components/common/Sidebar.vue";
+    
     export default {
+        data(){
+            return {}
+        },
+        components:{Login, Register, CreateGroup, Sidebar},
+        created(){
+            this.$store.dispatch("user/loadUser", this.$http);
+        }
     }
     
 </script>

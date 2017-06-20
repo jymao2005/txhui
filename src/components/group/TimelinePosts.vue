@@ -72,7 +72,7 @@
                 historyList:[]
                 , futureList:[]
                 , pendingPost:null
-                , batchSize:3
+                , batchSize:6
             }
         }
         , computed:{
@@ -95,7 +95,9 @@
                 return d.toLocaleString();
             }
             ,showPendingNow(){
-                this.historyList.unshift(this.pendingPost);
+                if(!isDup(this.historyList, this.pendingPost)){
+                    this.historyList.unshift(this.pendingPost);
+                }
                 this.futureList.shift();
                 if(this.pendingPost.ts>this.progressTS){
                     this.$store.commit("setProgressTS", this.pendingPost.ts);
@@ -107,11 +109,19 @@
                 this.historyList.unshift(this.newPost)
             }
             , progressTS(){
-                var near = this.futureList[0];
-                this.pendingPost = near;
                 if(this.futureList.length<2 && !this.futureFetcher.hasDone()){
                     this.fetchMore("future");
                 }
+                if(!this.futureList.length){
+                    return;
+                }
+                var near = this.futureList[0];
+                if(isDup(this.historyList, near)){
+                    this.futureList.shift();
+                    return;
+                }
+                            
+                this.pendingPost = near;
                 if(!near){
                     return;
                 }
@@ -142,5 +152,11 @@
             this.fetchMore("future");
             this.fetchMore("history");
         }
+    }
+    
+    function isDup(list, post){
+        return list.some((item)=>{
+            return item._id === post._id
+        })
     }
 </script>

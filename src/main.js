@@ -2,19 +2,23 @@ import Vue from 'vue'
 
 import store from "./store";
 
+//console.log("store:", store);
 
 import iView  from "./iView.js"
 Vue.use(iView)
 
 import App from './App.vue'
 
-
 import vueSA from "vue-superagent";
 Vue.use(vueSA, {
   baseUrl:"http://chip.jymao.com:8101/ds"
 })
 
+import withCredentials from "./superagent-with-credentials.js"
+Vue.superagent.use(withCredentials(["qiniu.com"]));
 
+//import mgr from "./manager";
+//Vue.use(mgr, {$store:store, $http:Vue.superagent});
 
 import router from "./router.js";
 
@@ -23,7 +27,10 @@ Vue.directive("focus", {
         el.focus();
       }
 })
-  
+
+import utils from "./utils";
+Vue.prototype.$utils = utils;
+
 
 var vm = new Vue({ // eslint-disable-line no-new
   store,
@@ -37,10 +44,10 @@ var vm = new Vue({ // eslint-disable-line no-new
     }
   },
   methods:{
-    test(){
-      
-    }
+  }
+  ,beforeCreate(){
+    global.$$vm = this;
   }
 })
 
-global.vm = vm;
+//global.$$vm = vm;

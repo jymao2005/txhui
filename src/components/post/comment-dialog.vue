@@ -20,7 +20,7 @@
 
 </style>
 <script type="text/javascript">
-    import Editor from "../Editor.vue";
+    import Editor from "../editor/Editor.vue";
     import Comment from "./Comment.vue";
     
     export default {

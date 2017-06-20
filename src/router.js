@@ -50,7 +50,7 @@ var router = new VueRouter({
         {path:"/u/:userId", component:User},
         {path:"/", redirect(){
             if(localStorage.getItem("userInfo")){
-                return "/home"
+                return "/welcome"
             }
             else {
                 return "/welcome"

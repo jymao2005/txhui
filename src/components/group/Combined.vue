@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Editor v-model="newCnt" @typeChanged="typeChanged()" :defaultType="postType"></Editor>
+        <Editor key="editor" v-model="newCnt" @typeChanged="typeChanged" :defaultType="postType"></Editor>
         
         <TimelinePosts :key="groupInfo._id" :groupId="groupInfo._id" :newPost="newPost" ></TimelinePosts>
     </div>
@@ -22,25 +22,39 @@
             return {
                 newCnt:"",
                 newPost:{},
-                postType:"提问"
+                postTypeBySelect:""
             }
         }
         ,computed:{
             ...mapState(['progressTS'])
+            , postType(){
+                if(this.postTypeBySelect){
+                    return this.postTypeBySelect
+                }
+                var groupCreator = this.groupInfo.creator;
+                var uid = this.$store.state.user._id;
+                if(groupCreator === uid){
+                    return "短笔记"
+                }
+                return "提问"
+            }
         }
         ,watch:{
-            newCnt(){
+            async newCnt(){
                 console.log("newCnt")
                 if(!this.newCnt){
                     return;
                 }
-                var {name,_id:id} = this.groupInfo;
+                await this.$store.dispatch("user/ensureLogin")
+                
+                var {_id:id} = this.groupInfo;
+                var {name, figureUrl:creatorFigureUrl, _id:creatorId} = this.$store.state.user;
                 this.$http.post("/g/Post")
                     .send({
                         html:this.newCnt,
-                        creator:1,
-                        creatorName:"测试用户1"
-                        , creatorFigureUrl:""
+                        creator:creatorId,
+                        creatorName:name
+                        , creatorFigureUrl:creatorFigureUrl
                         , ts: this.progressTS //this.totalTS //s use progressTS here?
                         , groups:[id]
                         , type:this.postType||"短笔记"
@@ -54,8 +68,8 @@
             }
         },
         methods:{
-            typeChanged(post){
-                this.postType = type;
+            typeChanged(type){
+                this.postTypeBySelect = type;
             }
         }
     }

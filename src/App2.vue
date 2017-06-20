@@ -52,7 +52,7 @@
 <script>
 import Hello from './components/Hello.vue'
 import Todos from './components/Todos.vue'
-import Editor from "./components/Editor.vue"
+import Editor from "./components/editor/Editor.vue"
 import Home from "./components/Home.vue"
 //import Group from "./components/Group.vue"
 import TranstionTest from "./components/TransitionTest.vue"
