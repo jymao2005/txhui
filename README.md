@@ -1,7 +1,6 @@
 # 同学会
 一个一起学习的社区. 开发中.
 
-> try try
 
 ## Build Setup
 
