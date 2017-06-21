@@ -3,6 +3,10 @@ export default class Image {
         this.editArea = editArea;
         this.uploader = uploader;
     }
+
+    pasteImage(value){
+        value && this.uploader.uploadAsync(value.getAsFile())
+    }
     insertPasteImage(e){
         var result = [];
 
@@ -11,7 +15,7 @@ export default class Image {
         if (!items) {
             return result;
         }
-    
+        //todo optimize for ue. faster to show it in editor.
         Object.keys(items).forEach((key) =>{
             var value = items[key];
             var type = value.type;

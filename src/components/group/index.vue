@@ -62,7 +62,7 @@
         },
         computed:{
             id(){
-                return this.$route.params.groupId;
+                return this.$route.params.groupId || this.groupInfo._id;
             },
             ...mapState(["progressTS"])
         },
@@ -74,6 +74,7 @@
                 this.$http.get("/g/Group/"+this.id)
                     .then((res)=>{
                         this.groupInfo = res.body;
+                        this.$store.commit("group/currentGroup", this.groupInfo);
                     })
             },
             loadTotalTS(){
@@ -90,7 +91,7 @@
         },
         created(){
             this.fetchGroupInfo();
-            this.$store.dispatch("user/subscrGroup", this.id)
+            this.$store.dispatch("user/subscrGroup", this.id);
         },
         mounted(){
            this.loadTotalTS();
@@ -100,7 +101,6 @@
                     this.totalTS++;
                     this.$store.commit("incrProgressTS");
                     this.$store.commit("user/incrProgress", this.id);
-
                 }
             },1000)    
         },
@@ -111,6 +111,7 @@
             this.timer = null;
 
             this.$store.dispatch("user/saveProgressOnServer", this.id);
+            this.$store.commit("group/currentGroup", {});
         }
     }
 </script>

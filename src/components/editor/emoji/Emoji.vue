@@ -8,15 +8,10 @@
 </template>
 
 <script type="text/javascript">
-   // import listObj from "./listObj.js";
+   import listObj from "./listObj.js";
     
     function getList(){
-        var list = [];
-        var faceStr = '😄 😁 😆 😅 😂  😊 😇 🙂 🙃 😉 😌 😍 😘 😗 😙 😚 😋 😜 😝 😛 🤑 🤗 🤓 😎 😏 😒 😞 😔 😟 😕 🙁  😣 😖 😫 😩 😤 😠 😡 😶 😐 😑 😯 😦 😧 😮 😲 😵 😳 😱 😨 😰 😢 😥 😭 😓 😪 😴 🙄 🤔 😬 🤐';
-        list = list.concat(faceStr.split(/\s+/));
-
-        var handStr = '🙌 👏 👋 👍 👎 👊 ✊ ️👌 ✋ 👐 💪 🙏 ️👆 👇 👈 👉 🖕 🖐 🤘 🖖';
-        list = list.concat(handStr.split(/\s+/))
+        var list = Object.values(listObj).map((item)=>"/dist/emoji/"+item);
         return list;
     }
     export default {
@@ -27,7 +22,7 @@
         }
         , methods:{
             toHtml(item){
-                return `<a href="javascript:void(0)" data-emoji>${item}</a>`;
+                return `<img src="${item}" data-emoji/>`;
             },
             toggle(referenceEle){
                 var popover = this.$refs.popover;
@@ -42,7 +37,7 @@
 
 <style lang='stylus'>
     ul.list-inline li[data-emoji]
-        padding:0rem .5rem;
+        padding:0rem 0rem;
 
         &:hover
             cursor:pointer;
@@ -53,7 +48,7 @@
     
     [data-emoji]
         font-size:1.2rem;
-        margin:0 .3rem;
+        margin:0 0.2rem;
 
     .editArea    
         [data-emoji]:hover

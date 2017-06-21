@@ -240,4 +240,41 @@ export default class EditorArea {
     execCmd(cmd, opts){
         document.execCommand(cmd, false, opts)
     }
+    paste(e){
+        var clipboardData = e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {};
+        var items = clipboardData.items;
+        if (!items) {
+            return;
+        }
+        Object.keys(items).forEach((key) =>{
+            var value = items[key];
+            var type = value.type;
+            if (/image/i.test(type)) {
+                this.imageHandler.pasteImage(value);
+            }
+            else if(/html/i.test(type)){
+                this.pasteHTML(value);
+                e.preventDefault();
+            }
+        })
+    }
+    pasteHTML(value){
+        value.getAsString((html)=>{
+            // 过滤word中状态过来的无用字符
+            console.log(html)
+            var docSplitHtml = html.split('</html>');
+            if (docSplitHtml.length === 2) {
+                html = docSplitHtml[0];
+            }
+            
+            // 过滤无用标签
+            html = html.replace(/<(meta|script|link).+?>/igm, '')
+                    .replace(/\s?(class|style)=('|").+?('|")/igm, '');
+            console.log(html)
+            this.insertHTML(html)
+            
+        });
+    }
 }
+
+// todo: we can put image in editor directly instead of uploading to let user see image faster.

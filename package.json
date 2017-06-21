@@ -10,7 +10,7 @@
     "dev": "npm-run-all --parallel watchify serve",
     "lint": "eslint --ext .js,.vue src test/unit",
     "test": "karma start karma.conf.js",
-    "build": "cross-env NODE_ENV=production browserify -g envify -p [ vueify/plugins/extract-css -o dist/build.css ] --global-transform babelify --global-transform vueify --global-transform [ browserify-css --minify=true]  -e src/main.js | uglifyjs -c warnings=false -m | tee  dist/build.js | gzip >dist/build.js.gz"
+    "build": "cross-env NODE_ENV=production browserify -g envify -p [ vueify/plugins/extract-css -o dist/build.css ] --global-transform babelify --global-transform vueify --global-transform [ browserify-css --minify=true]  -e src/main.js | uglifyjs -c warnings=false -m > dist/build.js"
   },
   "browserify": {
     "transform": []
@@ -58,7 +58,6 @@
     "stylus": "^0.54.5",
     "superagent": "^3.5.2",
     "uglify-js": "^2.5.0",
-    "vue-emoji": "^0.0.2",
     "vue-superagent": "^1.2.0",
     "vueify": "^9.0.0",
     "vuex": "^2.3.1",

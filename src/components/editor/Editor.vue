@@ -1,22 +1,23 @@
 <template>
-    <div class="container" :class="{focused}">
+    <div class="container" :class="{focused}" @keyup.esc="$emit('cancel')">
         <div class='editArea' v-focus ref="editArea" 
             :placeholder="placeholder || placeholders[type]"
             contentEditable="true" 
             spellcheck="false"
             :class="{dragOver:dragOver}"
-            @keydown="editArea.initNewline()"
+            @keydown="recordUsedTime();editArea.initNewline()"
             @keydown.enter = "editArea.addNewline() && $event.preventDefault()"
             @keydown.enter.ctrl.prevent="publish"
             @keydown.tab.prevent="editArea.insertHTML('&nbsp;&nbsp;&nbsp;&nbsp;')"
             @keyup ="editArea.selection.saveRange()"
             @keyup.ctrl="onKeyupCtrl($event)"
             @keyup.esc="$refs.editArea.blur()"
-            @paste="editArea.pasteImage($event)"
+            @paste="editArea.paste($event)"
             @dragover.prevent="dragOver=true"
             @dragleave.prevent="dragOver=false"
             @drop.prevent="onDrop"
-            @focus="focused=true" @blur="focused=false">
+            @focus="focused=true" @blur="focused=false"
+            v-html="value">
              
         </div>
         <div class="toolbar" style='position:relative' @click="editArea.initNewline()">
@@ -37,7 +38,15 @@
                             :value="type"></Option>
             </Select>
             
-            <Button  @click="publish" type="text" :style="{position:'absolute', right:'1em', top:'0', bottom:'0'}">发表 Ctrl+Enter</Button>
+            <ul class="list-inline" :style="{position:'absolute', right:'1em', top:'0', bottom:'0', margin:0, padding:0}">
+                <li v-if="needCancelBtn">
+                    <Button  @click="$emit('cancel')" type="text" >取消 ESC</Button>
+                </li>
+                <li>
+                    <Button  @click="publish" type="text" >发表 Ctrl+Enter</Button>
+                </li>
+
+            </ul>
             
         </div>   
         <InsertImage :editArea="editArea" ref="insertImage"></InsertImage>
@@ -100,6 +109,9 @@
         border-bottom-left-radius:.2em;
         border-bottom-right-radius:.2em;
         
+        line-height:3rem;
+        height:3rem;
+        
 
 </style>
 
@@ -115,7 +127,8 @@
         props:{
           value:String,
           placeholder:String,
-          defaultType:String
+          defaultType:String,
+          needCancelBtn:Boolean
         },
         watch:{
             value(){
@@ -127,6 +140,7 @@
         },
         data(){
             return {
+                usedTime:0,
                 dragOver:false,
                 editArea:null,
                 placeholders:{
@@ -180,6 +194,10 @@
             }    
         },
         methods:{
+            recordUsedTime(){
+                var len = this.$refs.editArea.textContent.trim().length;
+            
+            },
             onEmojiSelected(e){
                 console.log(e)
                 this.editArea.insertHTML(e)                

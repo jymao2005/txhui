@@ -6,11 +6,17 @@ var defaultUser = {
     name:"",
     groups:[],
     progresses:{},
-    nickname:""
+    nickname:"",
+    _id:0
 }
 export default {
     namespaced:true,
     state:Object.assign({}, defaultUser)
+    ,getters:{
+        uid(state){
+            return state._id
+        }
+    }
     ,mutations:{
         save(state, user){
             Object.assign(state, user);

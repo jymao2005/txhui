@@ -40,7 +40,8 @@ import {Input, Loading, Icon, Tag, Button, Tabs
         , Menu,
           Submenu,
           MenuItem,
-          MenuItemGroup
+          MenuItemGroup,
+          MessageBox
 
 } from "element-ui";
 //import Input from 'iview/src/components/input';
@@ -76,7 +77,8 @@ const iview = {
     , Menu,
       Submenu,
       MenuItem,
-      MenuItemGroup
+      MenuItemGroup,
+      MessageBox
 };
 
 function formatTS(ts){
@@ -138,6 +140,12 @@ const install = function (Vue, opts = {}) {
     Vue.prototype.formatTS = formatTS;
     Vue.prototype.formatDatetime = formatDatetime;
     Vue.prototype.$message = Message;
+
+    Vue.prototype.$msgbox = MessageBox;
+    Vue.prototype.$alert = MessageBox.alert;
+    Vue.prototype.$confirm = MessageBox.confirm;
+    Vue.prototype.$prompt = MessageBox.prompt;
+
 
   //  Vue.prototype.mapState = mapState;
     Object.assign(Vue.prototype, {
