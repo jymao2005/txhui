@@ -31,7 +31,7 @@
         
         <Editor :value="post.html" 
                 v-if="needModify" 
-                @publish="updatePost" 
+                @input="updatePost" 
                 @cancel="needModify=false"
                 :needCancelBtn="true"
                 >
