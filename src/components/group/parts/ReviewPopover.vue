@@ -6,7 +6,7 @@
                     <Input
                         type="text" 
                         v-model="model.ts"
-                        @keyup.enter.prevent="submit"
+                        @keyup.enter.prevent.native="submit"
                     ></Input>
                 </FormItem>
                 <FormItem><Button type="primary" @click="submit">确定</Button></FormItem>
