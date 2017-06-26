@@ -1,6 +1,6 @@
-# 同学会
-一个一起学习的社区. 开发中.
+# txhui
 
+> A Vue.js project
 
 ## Build Setup
 
@@ -14,11 +14,17 @@ npm run dev
 # build for production with minification
 npm run build
 
-# lint all *.js and *.vue files
-npm run lint
+# build for production and view the bundle analyzer report
+npm run build --report
 
 # run unit tests
+npm run unit
+
+# run e2e tests
+npm run e2e
+
+# run all tests
 npm test
 ```
 
-For more information see the [docs for vueify](https://github.com/vuejs/vueify).
+For detailed explanation on how things work, checkout the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).

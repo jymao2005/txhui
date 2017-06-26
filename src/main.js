@@ -22,7 +22,7 @@ Vue.superagent.use(withCredentials(["qiniu.com"]));
 //import mgr from "./manager";
 //Vue.use(mgr, {$store:store, $http:Vue.superagent});
 
-import router from "./router.js";
+import router from "./router/router.js";
 
 Vue.directive("focus", {
       inserted(el){

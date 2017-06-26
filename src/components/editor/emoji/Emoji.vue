@@ -11,7 +11,7 @@
    import listObj from "./listObj.js";
     
     function getList(){
-        var list = Object.values(listObj).map((item)=>"/dist/emoji/"+item);
+        var list = Object.values(listObj).map((item)=>"/static/emoji/"+item);
         return list;
     }
     export default {

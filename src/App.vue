@@ -21,6 +21,9 @@
     .fa-icon
         padding:.5em;
     
+    .el-button .fa-icon
+        padding:0
+
     html,body
         font-size:14px;
         

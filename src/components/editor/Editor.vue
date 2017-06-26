@@ -25,6 +25,7 @@
                 <Button :style="cmd.style ||{border:'none'}" 
                         :type="cmd.type||'plain'" 
                         v-for="(cmd,idx) in cmds"
+                        :key="idx"
                         v-if="!isHidden(cmd)"
                         :ref="cmd.ref"
                         @click="handleCmd(cmd, idx)">
@@ -74,8 +75,6 @@
 </style>
 
 <style lang="stylus" scoped>
-    .fa-icon
-        padding:0
     
     .container 
         max-width:650px;

@@ -9,7 +9,8 @@
             <footer style="color:grey;font-style:italic;border-bottom:1px dashed lightgrey">
                 <span style="margin-right:1em">{{createdAt}}</span>
                 <ButtonGroup>
-                    <Button v-for="cmd in cmds"
+                    <Button v-for="(cmd,idx) in cmds"
+                            :key="idx"
                             style="border:none" size="small"
                             @click="onCmd(cmd)"
                         >
@@ -68,10 +69,9 @@
                 return this.formatDatetime(this.post.createdAt);
             }
             ,ownerOrAdmin(){
-                console.log("some changed")
                 var uid = this.curUserId;
                 var creator = this.post.creator;
-                var groupCreator = this.$store.state.group.currentGroup.creator;
+                var groupCreator = this.$store.state.curGroup.creator;
 
                 return (uid === creator || uid === groupCreator);
             }

@@ -1,9 +1,15 @@
 <template>
     <div class="container">
         <div class="header">
-            <tag type="" class="pull-right">学习总时长 {{formatTS(totalTS)}}
-                <span style="margin-left:1em" v-if="Math.abs(totalTS-progressTS)>10">进度 {{formatTS(progressTS)}}</span>
-            </tag>
+            <div class="pull-right">
+                <tag type="">学习总时长 {{formatTS(totalTS)}}
+                    <span style="margin-left:1em" v-if="Math.abs(totalTS-progressTS)>10">进度 {{formatTS(progressTS)}}</span>
+                </tag>
+                <ReviewPopover :value="progressTS"
+                        v-once
+                        @input='setProgressTS'
+                        ></ReviewPopover>                
+            </div>
 
             <Breadcrumb>
                 <BreadcrumbItem :to="{path:'/'}">首页</BreadcrumbItem>
@@ -11,9 +17,8 @@
             </Breadcrumb>
         </div>
         <Tabs v-model="activeName">
-            <tab-pane label="综合" name="combined"></tab-pane>
-            <tab-pane label="短笔记" name="s-notes"></tab-pane>
-            <tab-pane label="问答" name="questions"></tab-pane>
+            <tab-pane label="时间线" name="timeline"></tab-pane>
+            <tab-pane label="最新" name="newest"></tab-pane>
         </Tabs>
         <router-view v-if="groupInfo._id" :groupInfo="groupInfo"></router-view>        
     </div>
@@ -30,15 +35,15 @@
 
 <script type="text/javascript" >
 
-    import {mapState} from "vuex"
+    import {mapState, mapGetters} from "vuex";
+    import ReviewPopover from "./parts/ReviewPopover";
     
     export default {
         name:"Group",
         data(){
             return {
                 activeName:this.$route.name,
-                groupInfo:{},
-                totalTS:0
+                groupInfo:{}
             }
         },
         watch:{
@@ -50,21 +55,13 @@
             },
             id(){
                 this.fetchGroupInfo();
-            },
-            totalTS(){
-
-                var info = {
-                                totalTS:this.totalTS
-                                , progressTS:this.$store.state.progressTS
-                            };
-             //   localStorage.setItem("group_"+this.id, JSON.stringify(info));
             }
         },
         computed:{
             id(){
                 return this.$route.params.groupId || this.groupInfo._id;
             },
-            ...mapState(["progressTS"])
+            ...mapGetters("user/", ["progress", "totalTS", "progressTS"])
         },
         methods:{
             fetchGroupInfo(){
@@ -74,44 +71,44 @@
                 this.$http.get("/g/Group/"+this.id)
                     .then((res)=>{
                         this.groupInfo = res.body;
-                        this.$store.commit("group/currentGroup", this.groupInfo);
+                        this.$store.commit("curGroup", this.groupInfo);
                     })
-            },
-            loadTotalTS(){
-//                var info = JSON.parse(localStorage.getItem("group_"+this.id)) 
-//                            || {totalTS:0, progressTS:0};
-                
-                var info = this.$store.state.user.progresses[this.id] 
-                            || {totalTS:0, progressTS:0};
-                this.totalTS = info.totalTS;
-                
-                var progressTS = info.progressTS || this.totalTS;
-                this.$store.commit("setProgressTS", progressTS);
+            }
+            ,setProgressTS(ts){
+                this.$store.dispatch("user/setProgressTS", ts);
+                setTimeout(()=>{
+                    $$vm.$emit("resetProgressTS");
+                },10)
             }
         },
         created(){
+            this.$store.commit("curGroup", {_id:this.id});
             this.fetchGroupInfo();
             this.$store.dispatch("user/subscrGroup", this.id);
         },
         mounted(){
-           this.loadTotalTS();
+            var step = Math.floor(Math.random()*30+30)
 
             this.timer = setInterval(()=>{
                 if(this.groupInfo._id){
-                    this.totalTS++;
-                    this.$store.commit("incrProgressTS");
-                    this.$store.commit("user/incrProgress", this.id);
+                    this.$store.dispatch("user/incrProgressTS");
+                    
+                    if(!this.progressTS%step){
+                        this.$store.dispatch("user/saveProgress");
+                        console.log("save")
+                    }
                 }
             },1000)    
         },
         components:{
+            ReviewPopover
         },
         beforeDestroy(){
             this.timer && clearInterval(this.timer);
             this.timer = null;
 
-            this.$store.dispatch("user/saveProgressOnServer", this.id);
-            this.$store.commit("group/currentGroup", {});
+            this.$store.dispatch("user/saveProgress", this.id);
+            this.$store.commit("curGroup", {});
         }
     }
 </script>

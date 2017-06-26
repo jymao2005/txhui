@@ -18,9 +18,9 @@ import "vue-awesome/icons/search.js"
 //import "normalize.css"
 import 'element-ui/lib/theme-default/base.css';
 
-import {search, smileO, code, pictureO, questionCircle, bars} from "vue-awesome"; 
+import {search, smileO, code, pictureO, questionCircle, bars, cog} from "vue-awesome"; 
 
-var tmp = {search, smileO, code, pictureO, questionCircle, bars};
+var tmp = {search, smileO, code, pictureO, questionCircle, bars, cog};
 
 
 //console.log("bold:", search)
@@ -120,9 +120,9 @@ function formatDatetime(dtStr){
 }
 
 
-import {mapState, mapMutation} from "vuex";
+import {mapState, mapMutations} from "vuex";
 
-import Clickoutside from 'element-ui/src/utils/clickoutside';
+import Clickoutside from 'element-ui/lib/utils/clickoutside';
 
 const install = function (Vue, opts = {}) {
 //    locale.use(opts.locale);
@@ -150,7 +150,7 @@ const install = function (Vue, opts = {}) {
   //  Vue.prototype.mapState = mapState;
     Object.assign(Vue.prototype, {
         mapState,
-        mapMutation
+        mapMutations
     })
 //    Vue.prototype.$Loading = LoadingBar;
 
@@ -161,4 +161,4 @@ if (typeof window !== 'undefined' && window.Vue) {
     install(window.Vue);
 }
 
-module.exports = Object.assign(iview, {install});   // eslint-disable-line no-undef
+export default Object.assign(iview, {install});   // eslint-disable-line no-undef

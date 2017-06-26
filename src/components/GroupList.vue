@@ -28,7 +28,7 @@
         </ul>
         <transition-group tag="ul" name='el-zoom-in-top' class='plain'>
             <li :key="id" v-for="{name, creator, intro, _id:id, members} in filteredList">
-                <ul class='list-inline group-item' :key="_id">
+                <ul class='list-inline group-item' :key="id">
                     <li><router-link :to='`/group/${id}`' :title="name">{{name}}</router-link></li>
                     <li v-if="creator && creator.name">
                         <router-link :to="`/u/${creator._id}`">

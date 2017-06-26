@@ -1,14 +1,10 @@
 {
-  "presets":[ "es2015" , "stage-0"],
-  "plugins": [
-    ["transform-runtime",
-    {
-      "helpers": false,
-      "polyfill": false,
-      "regenerator": true,
-      "moduleName": "babel-runtime"
-    }],    
-    ["component", [
+  "presets": [
+    ["env", { "modules": false }],
+    "stage-2"
+  ],
+  "plugins": ["transform-runtime",[
+	"component", [
     {
       libraryName: 'element-ui',
       styleLibraryName: 'theme-default',
@@ -17,5 +13,12 @@
       libraryName: 'vue-awesome',
        libDir:"icons"
     }
-  ]]]
+  ]]],
+  "comments": false,
+  "env": {
+    "test": {
+      "presets": ["env", "stage-2"],
+      "plugins": [ "istanbul" ]
+    }
+  }
 }

@@ -8,7 +8,10 @@
     "build": {
         "@builder": "auto",
         "@path": "/.c9/builders",
-        "@saveall": true
+        "@saveall": "true"
+    },
+    "codeintel": {
+        "@dismiss_installer": true
     },
     "find.nak": {
         "@searchLimit": 100

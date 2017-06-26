@@ -1,28 +1,51 @@
 <template>
     <div>
         <Timeline :pending="true">
-            <Transition>
-                <TimelineItem v-if="pendingPost" color="grey">
-                    <div>
-                        <span>下一条即将显示 {{formatTS(pendingPost.ts-progressTS)}}</span>
-                    </div>
-                    <Button @click="showPendingNow()" style="font-size:1em" type="text">立即显示</Button>
-    
-                </TimelineItem>
-            </Transition>
-            <TimelineItem v-for="post in historyList" :key="post._id" :data-id="post._id">
-                <IconFA  style="box-sizing:initial" color="red" name="question-circle" v-if="post.type=='提问'" slot="dot"></IconFA>
-                <Post :post="post"></Post>
+            <TimelineItem v-if="pendingPost" color="grey">
+                <div>
+                    <span>下一条 {{formatTS(pendingPost.ts)}} ({{formatTS(pendingPost.ts-progressTS)}})</span>
+                </div>
+                <Button  @click="showPendingNow()" style="font-size:1em;width:100%" type="plain">
+                        立即显示
+                </Button>
+
             </TimelineItem>
-            
+            <TimelineItem v-if="!pendingPost" color="grey">
+                <div>
+                    <span>&nbsp;</span>
+                </div>
+                <Button style="font-size:1em;width:100%" :disabled="true" type="plain">
+                        立即显示
+                </Button>
+
+            </TimelineItem>
+
+            <transition-group tag="ul" name='post'
+                            class='plain' ref="posts"
+                            @after-enter="onAfterEnter">
+                <TimelineItem v-for="post in historyList" :key="post._id" :data-id="post._id">
+                    <IconFA  style="box-sizing:initial" color="red" name="question-circle" v-if="post.type=='提问'" slot="dot"></IconFA>
+                    <Post :post="post"></Post>
+                </TimelineItem>
+            </transition-group>
+        
         </Timeline>
         <Button style="width:100%" v-if="!historyFetcher.hasDone()" @click="fetchMore('history')">显示更多</Button>
     </div>
 </template>
 
 <style lang="stylus">
+    .post-enter-active, .post-leave-active {
+      transition: opacity 1s;
+    }
+    .post-enter, .post-leave-active {
+      opacity: 0;
+    }
 
-        
+    .post-move {
+        transition: transform 1s;
+    }
+    
 </style>
 <script type="text/javascript" >
     import Post from "../post/timeline-post.vue"
@@ -44,14 +67,14 @@
                 .query({
                         condition:{
                             "groups":$vm.groupId,
-                            "ts":{[$cmp]:boundaryTS}
+                            "longTS":{[$cmp]:boundaryTS}
                         },
                         sortField
                         ,limit: $vm.batchSize
                     })
                     .then((res)=>{
                         var list = res.body;
-                        this.options.boundaryTS = list && list.length && list[list.length-1].ts;
+                        this.options.boundaryTS = list && list.length && list[list.length-1].longTS;
                         this.isDone = list.length<$vm.batchSize;
                         return Promise.resolve(res.body)
                     })
@@ -62,6 +85,7 @@
         
     }
     
+    import {mapGetters} from "vuex"
     export default {
         components:{
             Post
@@ -73,12 +97,13 @@
                 , futureList:[]
                 , pendingPost:null
                 , batchSize:6
+                , enableAni:false
+                , needSetProgressTS:false
+                , newProgressTS:-1
             }
         }
         , computed:{
-            progressTS(){
-                return this.$store.state.progressTS;
-            }
+            ...mapGetters("user/", ["progressTS"])
         }
         , methods:{
             async fetchMore(typeStr){
@@ -95,12 +120,49 @@
                 return d.toLocaleString();
             }
             ,showPendingNow(){
-                if(!isDup(this.historyList, this.pendingPost)){
-                    this.historyList.unshift(this.pendingPost);
-                }
-                this.futureList.shift();
+
                 if(this.pendingPost.ts>this.progressTS){
-                    this.$store.commit("setProgressTS", this.pendingPost.ts);
+                    this.needSetProgressTS = true;
+                    this.newProgressTS = this.pendingPost.ts;
+                }
+
+                this.historyList.unshift(this.pendingPost);
+                this.futureList.shift();
+                this.pendingPost = null;
+            }
+            , onScroll(e){
+                console.log(e)
+            }
+            , initFetchers(){
+                console.log("progressTS", this.progressTS)
+                this.futureFetcher = new PostsFetcher({
+                                                $vm:this
+                                                , $cmp:"$gt" 
+                                                , sortField:"+longTS"
+                                                , boundaryTS:this.progressTS*1000
+                })
+                
+                this.historyFetcher = new PostsFetcher({
+                                                $vm:this
+                                                , $cmp:"$lt" 
+                                                , sortField:"-longTS"
+                                                , boundaryTS:this.progressTS*1000
+                    
+                })
+                
+                this.fetchMore("future");
+                this.fetchMore("history");
+            }
+            ,reset(){
+                console.log("reset")
+                Object.assign(this.$data, this.$options.data());
+                this.initFetchers();
+            }
+            ,onAfterEnter(){
+                if(this.needSetProgressTS && this.newProgressTS>=0){
+                    this.$store.dispatch("user/setProgressTS", this.newProgressTS);
+                    this.needSetProgressTS = false;
+                    this.newProgressTS = -1;
                 }
             }
         }
@@ -112,51 +174,24 @@
                 if(this.futureList.length<2 && !this.futureFetcher.hasDone()){
                     this.fetchMore("future");
                 }
-                if(!this.futureList.length){
-                    return;
-                }
+
                 var near = this.futureList[0];
-                if(isDup(this.historyList, near)){
-                    this.futureList.shift();
-                    return;
-                }
-                            
                 this.pendingPost = near;
                 if(!near){
                     return;
                 }
+
                 if(this.progressTS>=near.ts){
                     this.showPendingNow();
                 }
             }
         }
         ,created(){
-            
-//            console.log("typeof progressTS", typeof this.progressTS, this.progressTS)
-//            console.log("timelineposts created for group:", this.groupId, this)
-            this.futureFetcher = new PostsFetcher({
-                                            $vm:this
-                                            , $cmp:"$gte" 
-                                            , sortField:"+ts"
-                                            , boundaryTS:this.progressTS
-            })
-            
-            this.historyFetcher = new PostsFetcher({
-                                            $vm:this
-                                            , $cmp:"$lte" 
-                                            , sortField:"-ts"
-                                            , boundaryTS:this.progressTS
-                
-            })
-            
-            this.fetchMore("future");
-            this.fetchMore("history");
+            this.initFetchers();            
+        }
+        ,mounted(){
+            global.$$vm.$on("resetProgressTS", ()=>this.reset());
         }
     }
     
-    function isDup(list, post){
-        return list.some((item)=>{
-            return item._id === post._id
-        })
-    }
 </script>

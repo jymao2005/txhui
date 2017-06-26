@@ -15,12 +15,27 @@ export default {
     ,getters:{
         uid(state){
             return state._id
+        },
+        localStoreName(state){
+            return state.hasLogin?"userInfo":"visitorInfo"
+        },
+        progress(state, getters, rootState, rootGetters){
+            var gid = rootGetters.curGroupId;
+            return gid && state.progresses[gid];
+        }
+        , totalTS(state, getters){
+            return (getters.progress && getters.progress.totalTS) || 0;
+        }
+        , progressTS(state, getters){
+            return (getters.progress && getters.progress.ts) || 0;
         }
     }
     ,mutations:{
-        save(state, user){
+        save(state, localStoreName){
+            window.localStorage.setItem(localStoreName, JSON.stringify(state));
+        },
+        load(state, user){
             Object.assign(state, user);
-            window.localStorage.setItem("userInfo", JSON.stringify(state));
         },
         loginNow(state){
             state.needLogin = true;
@@ -44,23 +59,16 @@ export default {
             window.localStorage.removeItem("userInfo");
             $$vm.$message({message:"注销成功", type:"success"});
         }
-        ,subscrGroup(state, {groupId, groups}){
+        ,subscrGroup(state, {groups, localStoreName}){
             //when one user enter a group, we say he subscribe the group.
             state.groups = groups
-            if(!state.progresses[groupId]){
-                //for case that reenter a group
-                state.progresses[groupId]={
-                    totalTS:0,
-                    progressTS:0
-                }
-            }
-            window.localStorage.setItem("userInfo", JSON.stringify(state));
+            window.localStorage.setItem(localStoreName, JSON.stringify(state));
         }
-        ,quitGroup(state,{groupId, groups}){
+        ,quitGroup(state,{groupId, groups, localStoreName}){
             state.groups = groups
             state.progresses[groupId] = null;                    
-            window.localStorage.setItem("userInfo", JSON.stringify(state));
-        }
+            window.localStorage.setItem(localStoreName, JSON.stringify(state));
+        }/*
         ,incrProgress(state,id){
             var progress = state.progresses[id];
             if(!progress){
@@ -78,7 +86,7 @@ export default {
             var progress = state.progresses[id];
             progress.progressTS = newProgress;
             window.localStorage.setItem("userInfo", JSON.stringify(state));
-        }
+        }*/
         ,newUser(state, nickname){
             state.needRegister = true;
             state.needLogin = false;
@@ -90,18 +98,31 @@ export default {
         },
         cancelRegister(state){
             state.needRegister = false;
+        },
+        addProgress(state, groupId){
+            $$vm.$set( state.progresses, groupId, {totalTS:0, ts:0})
+        },
+        setProgressTS(state,{ts, groupId}){
+            state.progresses[groupId].ts = ts;
+        },
+        incrProgress(state, groupId){
+            var progress = state.progresses[groupId];
+            progress.ts++;
+            progress.totalTS++;
         }
     }
     ,actions:{
-        async loadUser({commit}, $http){
-            var user = JSON.parse(window.localStorage.getItem("userInfo"));
+        async loadUser({commit, getters}, $http){
+            var localStoreName = getters.localStoreName;
+            var user = JSON.parse(window.localStorage.getItem(localStoreName));
             if(user) {
-                commit("save", user)
+                commit("load", user)
             }
             var res = await $http.get("/self");
             user = res && res.body && res.body.user;
             if(user){
-                commit("save", res.body.user);
+                commit("load", res.body.user);
+                commit("save", localStoreName);
             }
         }
         , ensureLogin({state, commit}){
@@ -117,7 +138,7 @@ export default {
                 })
             })
         }
-        , async loginOnServer({state, commit}, info){
+        , async loginOnServer({state, commit, getters}, info){
             var res = await $$vm.$http.post("/login").send(info)
             var ret = res.body;
             switch(ret.status){
@@ -126,7 +147,8 @@ export default {
                     break;
                 case "ok":
                     commit("hasLogin");
-                    commit("save", ret.user);
+                    commit("load", ret.user);
+                    commit("save", getters.localStoreName)
                     $$vm.$message({message:"登录成功", type:"success"})
                     break;
                 default:
@@ -134,28 +156,31 @@ export default {
                     break;
             }
         }
-        , async registerOnServer({state, commit}, info){
+        , async registerOnServer({state, commit, getters}, info){
                 var res = await $$vm.$http.post("/register").send(info)
                 var ret = res.body;
                 switch(ret.status){
                     case "ok":
                         commit("registerDone");
                         commit("hasLogin");
-                        commit("save", ret.user);
+                        commit("load", ret.user);
+                        commit("save", getters.localStoreName);
                         break;
                     default:
                         $$vm.$message("注册失败.可能服务器出问题了...")
                         break;
                 }
         }
-        , async saveProgressOnServer({state,commit}, groupId){
-            var progress = state.progresses[groupId];
+        , async saveProgress({state,commit, getters}, groupId){
+            commit("save", getters.localStoreName);
+
+            var progress = state.progresses[groupId];            
             if(progress && state.hasLogin){
                 await $$vm.$http.post("/user/progress")
                     .send({groupId:groupId, progress:progress})
             }
         }
-        ,async subscrGroup({state, commit, dispatch}, groupId){
+        ,async subscrGroup({state, commit, dispatch, getters}, groupId){
             if(state.groups.indexOf(parseInt(groupId))!=-1 || !state.hasLogin){
                 return;
             }
@@ -163,10 +188,11 @@ export default {
             var res = await $$vm.$http.post("/user/joinGroup")
                     .send({groupId:groupId});
             var data = res.body;
-            commit("subscrGroup", {groupId, groups:data.groups})
+            var localStoreName = getters.localStoreName;
+            commit("subscrGroup", {groups:data.groups, localStoreName})
             commit("group/setGroupMembers",{ groupId, members:data.members}, {root:true})
         }
-        ,async quitGroup({state, commit, dispatch, rootState}, groupId){
+        ,async quitGroup({state, commit, dispatch, rootState, getters}, groupId){
             if(state.groups.indexOf(groupId)==-1 || !state.hasLogin){
                 return;
             }
@@ -175,8 +201,33 @@ export default {
                     .send({groupId:groupId});
             var data = res.body;
             commit("quitGroup", {groupId, groups:data.groups})
-            commit("group/setGroupMembers",{ groupId, members:data.members}, {root:true})
-            
+            var localStoreName = getters.localStoreName;
+            commit("group/setGroupMembers",{localStoreName, groupId, members:data.members}, {root:true})
+        }
+        , async ensureProgress({state, commit, getters, rootGetters}){
+            var gid = rootGetters.curGroupId;
+            if(!gid){
+                return Promise.reject(new Error("no current groupd Id"))
+            }
+            if(!getters.progress){
+                commit("addProgress", gid);
+            }
+            var progress = getters.progress;
+
+            //to adapt old version
+            if(progress.progressTS){
+                $$vm.$set(progress, "ts", progress.progressTS);
+                delete progress.progressTS;
+            }
+            return Promise.resolve(getters.progress)
+        }
+        , async incrProgressTS({state, getters, dispatch, commit, rootGetters}){
+            await dispatch("ensureProgress");
+            commit("incrProgress", rootGetters.curGroupId);
+        }
+        , async setProgressTS({state, commit, dispatch, rootGetters}, ts){
+            await dispatch("ensureProgress");
+            commit("setProgressTS", {ts:ts, groupId:rootGetters.curGroupId})
         }
 
     }

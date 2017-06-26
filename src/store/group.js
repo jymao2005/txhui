@@ -25,9 +25,6 @@ export default {
                 }
             })
         }
-        , currentGroup(state, groupInfo){
-            state.currentGroup = groupInfo;
-        }
     }
     ,actions:{
         loadGroupList({state, commit}){
