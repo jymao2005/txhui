@@ -13,7 +13,7 @@
     "test": "npm run unit && npm run e2e",
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs",
     "deploy": "scp -r ./dist/*  user@chip.jymao.com:/mnt/projects/txhui/public/",
-    "prod": "run-s build git deploy",
+    "prod": "run-s build \"git -- {1}\" deploy --",
     "git":"/home/user/.nvm/versions/node/v8.1.2/bin/node jobs/git.js"
   },
   "dependencies": {

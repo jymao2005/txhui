@@ -34,7 +34,7 @@ export default {
                 , populate:{
                     path:"creator",
                     select:"name figureUrl"
-                }
+                }, sortField:"-countMembers"
                 
             })
             .then((res)=>{
