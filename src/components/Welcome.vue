@@ -3,7 +3,7 @@
         <div class="hero">
             <blockquote>
                 <p>
-                    最好的学习方法就是教会同学, 或者, 被同学教会.
+                    最好的学习方法就是同学教会同学.
                 </p>
                 <footer>— <cite>同学会</cite></footer>
             </blockquote>

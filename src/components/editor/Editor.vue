@@ -56,6 +56,8 @@
 </template>
 <style lang='stylus'>
     .editArea, .post-content
+        font-size:1rem;
+        
         * 
             margin:0;
             padding:0;

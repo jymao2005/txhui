@@ -84,6 +84,7 @@
                             creatorName,
                             figureUrl,
                             ts:0,
+                            longTS:Math.floor(Math.random()*999),
                             groups:[group._id],
                             type:"资料"
                         }).end();
