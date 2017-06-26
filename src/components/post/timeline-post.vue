@@ -145,7 +145,7 @@
                     .send({html:html});
                 this.$message("修改成功");
                 this.post.html = html;
-                
+                this.needModify = false;
             }
         }
         

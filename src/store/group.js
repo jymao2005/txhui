@@ -4,6 +4,8 @@ export default {
         creatingGroup:false,
         groupList:[]
     }
+    ,getters:{
+    }
     ,mutations:{
         createGroup(state){
             state.creatingGroup = true;
@@ -34,8 +36,7 @@ export default {
                 , populate:{
                     path:"creator",
                     select:"name figureUrl"
-                }, sortField:"-countMembers"
-                
+                }, sortField:{countMembers:-1}
             })
             .then((res)=>{
                 //state.groupList = res.body;

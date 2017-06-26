@@ -53,6 +53,7 @@
     class PostsFetcher{
         constructor(options){
             this.options = options;
+            this._fetching =false;
         }
         fetch(){
             if(this.isDone){
@@ -63,6 +64,8 @@
                 this.isDone = true;
                 return Promise.resolve([]);
             }
+            this._fetching = true;
+            console.log("fetch begin")
             return $vm.$http.get("/g/Post")
                 .query({
                         condition:{
@@ -76,11 +79,16 @@
                         var list = res.body;
                         this.options.boundaryTS = list && list.length && list[list.length-1].longTS;
                         this.isDone = list.length<$vm.batchSize;
+                        this._fetching = false;
+                        console.log("fetch done")
                         return Promise.resolve(res.body)
                     })
         }
         hasDone(){
             return this.isDone;
+        }
+        isFetching(){
+            return this._fetching;
         }
         
     }
@@ -109,7 +117,7 @@
             async fetchMore(typeStr){
                 var fetcher = this[typeStr+"Fetcher"];
                 
-                if(fetcher.hasDone()){
+                if(fetcher.hasDone() || fetcher.isFetching()){
                     return;
                 }
                 var list = await fetcher.fetch();
@@ -138,14 +146,14 @@
                 this.futureFetcher = new PostsFetcher({
                                                 $vm:this
                                                 , $cmp:"$gt" 
-                                                , sortField:"+longTS"
+                                                , sortField:{longTS:1}
                                                 , boundaryTS:this.progressTS*1000
                 })
                 
                 this.historyFetcher = new PostsFetcher({
                                                 $vm:this
                                                 , $cmp:"$lt" 
-                                                , sortField:"-longTS"
+                                                , sortField:{longTS:-1}
                                                 , boundaryTS:this.progressTS*1000
                     
                 })
@@ -172,6 +180,7 @@
             }
             , progressTS(){
                 if(this.futureList.length<2 && !this.futureFetcher.hasDone()){
+                    console.log("fetch future ", this.progressTS, new Date())
                     this.fetchMore("future");
                 }
 

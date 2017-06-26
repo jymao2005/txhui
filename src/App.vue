@@ -17,7 +17,16 @@
     * 
         box-sizing:border-box;
     
+    .gray { 
+        -webkit-filter: grayscale(100%);
+        -moz-filter: grayscale(100%);
+        -ms-filter: grayscale(100%);
+        -o-filter: grayscale(100%);
         
+        filter: grayscale(100%);
+    	
+        filter: gray;
+    }        
     .fa-icon
         padding:.5em;
     

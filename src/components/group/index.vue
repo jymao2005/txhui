@@ -16,6 +16,9 @@
                 <BreadcrumbItem>{{groupInfo.name}}</BreadcrumbItem>
             </Breadcrumb>
         </div>
+        
+        <Members></Members>
+        
         <Tabs v-model="activeName">
             <tab-pane label="时间线" name="timeline"></tab-pane>
             <tab-pane label="最新" name="newest"></tab-pane>
