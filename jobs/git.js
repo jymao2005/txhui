@@ -4,7 +4,7 @@ function runShell(path, args){
         args = args.split(" ");
     }
     const sh = cp.spawn(path, args );
-    console.log(sh)
+   // console.log(sh)
     return new Promise((resolve, reject)=>{
         sh.stdout.on("data", (data)=>{
             console.log(`${path} stdout:${data}`)
