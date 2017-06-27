@@ -45,5 +45,21 @@ export default {
                 console.error(err)
             })
         }
+        , getGroupById({state}, gid){
+            console.log(state, gid)
+            
+            var group = state.groupList.find((group)=>group._id===+gid);
+            console.log("group:", group)
+            return group;
+        }
+        , setGroupMembers({commit, rootState}, {groupId, members}){
+            commit("setGroupMembers", {groupId, members});
+            console.log("arguments", arguments)
+            var curGroup = rootState.curGroup;
+            if(curGroup && curGroup._id === groupId){
+                commit("setCurGroupMember", members, {root:true})
+            }
+            
+        }
     }
 }

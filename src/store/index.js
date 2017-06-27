@@ -24,5 +24,8 @@ export default new Vuex.Store({
         curGroup(state, group){
             state.curGroup = group
         }
+        , setCurGroupMember(state, members){
+            $$vm.$set(state.curGroup, "members", members);
+        }
     }
 })

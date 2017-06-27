@@ -6,7 +6,7 @@
                 <BreadcrumbItem>个人主页</BreadcrumbItem>
             </Breadcrumb>            
         </div>
-        <img :src="user.figureUrl100"></img>
+        <img :src="user.figureUrl100" width="100px" height="100px"></img>
         <span>{{user.name}}</span>
         <span>{{user.gender}}</span>
         <h5>同学会</h5>

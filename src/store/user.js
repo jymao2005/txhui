@@ -181,16 +181,18 @@ export default {
             }
         }
         ,async subscrGroup({state, commit, dispatch, getters}, groupId){
-            if(state.groups.indexOf(parseInt(groupId))!=-1 || !state.hasLogin){
+            if(!state.hasLogin){
                 return;
             }
             
             var res = await $$vm.$http.post("/user/joinGroup")
                     .send({groupId:groupId});
             var data = res.body;
-            var localStoreName = getters.localStoreName;
             commit("subscrGroup", {groups:data.groups, localStoreName})
-            commit("group/setGroupMembers",{ groupId, members:data.members}, {root:true})
+            await dispatch("group/setGroupMembers",{ groupId, members:data.members}, {root:true});
+
+            var localStoreName = getters.localStoreName;
+            commit("save", localStoreName)            
         }
         ,async quitGroup({state, commit, dispatch, rootState, getters}, groupId){
             if(state.groups.indexOf(groupId)==-1 || !state.hasLogin){
@@ -200,9 +202,12 @@ export default {
             var res = await $$vm.$http.post("/user/quitGroup")
                     .send({groupId:groupId});
             var data = res.body;
+            
             commit("quitGroup", {groupId, groups:data.groups})
+            await dispatch("group/setGroupMembers",{groupId, members:data.members}, {root:true})
+
             var localStoreName = getters.localStoreName;
-            commit("group/setGroupMembers",{localStoreName, groupId, members:data.members}, {root:true})
+            commit("save", localStoreName)            
         }
         , async ensureProgress({state, commit, getters, rootGetters}){
             var gid = rootGetters.curGroupId;

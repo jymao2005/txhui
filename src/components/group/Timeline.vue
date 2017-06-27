@@ -31,12 +31,12 @@
                 if(this.postTypeBySelect){
                     return this.postTypeBySelect
                 }
-                var groupCreator = this.groupInfo.creator;
-                var uid = this.$store.state.user._id;
-                if(groupCreator === uid){
+               // var groupCreator = this.groupInfo.creator;
+            //    var uid = this.$store.state.user._id;
+             //   if(groupCreator === uid){
                     return "短笔记"
-                }
-                return "提问"
+             //   }
+             //   return "提问"
             }
         }
         ,watch:{

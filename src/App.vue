@@ -1,6 +1,6 @@
 <template>
     <div>
-        <keep-alive exclude="Group, User">
+        <keep-alive exclude="Group,User">
             <router-view></router-view>
         </keep-alive>
         

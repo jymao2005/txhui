@@ -38,11 +38,15 @@
 
 <script type="text/javascript" >
 
-    import {mapState, mapGetters} from "vuex";
+    import {mapState, mapGetters, mapActions} from "vuex";
     import ReviewPopover from "./parts/ReviewPopover";
-    
+    import Members from "./parts/Members"
     export default {
         name:"Group",
+        components:{
+            ReviewPopover,
+            Members
+        },
         data(){
             return {
                 activeName:this.$route.name,
@@ -56,22 +60,32 @@
             activeName(){
                 this.$router.push({name:this.activeName});
             },
-            id(){
+          /*  id(){
                 this.fetchGroupInfo();
-            }
+            }*/
         },
         computed:{
             id(){
                 return this.$route.params.groupId || this.groupInfo._id;
             },
             ...mapGetters("user/", ["progress", "totalTS", "progressTS"])
+            , curGroup(){
+                return this.getGroupById(this.id);
+            }
         },
         methods:{
+            ...mapActions("group/", ["getGroupById"]),
             fetchGroupInfo(){
                 if(!this.id){
                     return;
                 }
                 this.$http.get("/g/Group/"+this.id)
+                    .query({
+                        populate:{
+                            path:"creator",
+                            fields:"name figureUrl"
+                        }
+                    })
                     .then((res)=>{
                         this.groupInfo = res.body;
                         this.$store.commit("curGroup", this.groupInfo);
@@ -84,10 +98,14 @@
                 },10)
             }
         },
-        created(){
-            this.$store.commit("curGroup", {_id:this.id});
-            this.fetchGroupInfo();
-            this.$store.dispatch("user/subscrGroup", this.id);
+        async created(){
+            var groupInfo = await this.curGroup;
+            if(!groupInfo){
+                this.fetchGroupInfo();
+            }
+            this.groupInfo = groupInfo || {_id:this.id};
+            this.$store.commit("curGroup", this.groupInfo);
+       //     this.$store.dispatch("user/subscrGroup", this.id);
         },
         mounted(){
             var step = Math.floor(Math.random()*30+30)
@@ -102,9 +120,6 @@
                     }
                 }
             },1000)    
-        },
-        components:{
-            ReviewPopover
         },
         beforeDestroy(){
             this.timer && clearInterval(this.timer);
