@@ -36,6 +36,9 @@
                 var members = this.curGroup && this.curGroup.members;
                 return this.uid && members && members.indexOf(this.uid)!=-1;
             }
+            , isCreator(){
+                return this.curGroup.creator._id === this.uid;
+            }
         },
         watch:{
             curGroup(){
@@ -74,11 +77,13 @@
                 console.log("subscrGroup")
             }
             , async quit(){
-                console.log("quit group")
                 await this.ensureLogin();
-                console.log("haslogin")
+                if(this.isCreator){
+                    this.$message({message:"你是此同学会的发起人, 发起人还不能退出"
+                                    , type:"warning"})
+                    return;
+                }
                 await this.quitGroup(this.curGroup._id);
-                console.log("quit success")
             }
         },
         async mounted(){
