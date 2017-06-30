@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Timeline :pending="true">
+        <Timeline :pending="true" style="">
             <TimelineItem v-if="pendingPost" color="grey">
                 <div>
                     <span>下一条 {{formatTS(pendingPost.ts)}} ({{formatTS(pendingPost.ts-progressTS)}})</span>
@@ -23,8 +23,14 @@
             <transition-group tag="ul" name='post'
                             class='plain' ref="posts"
                             @after-enter="onAfterEnter">
-                <TimelineItem v-for="post in historyList" :key="post._id" :data-id="post._id">
+                <TimelineItem v-for="post in historyList" 
+                        :key="post._id" 
+                        :data-id="post._id"
+                        style="position:relative;"
+                        >
                     <IconFA  style="box-sizing:initial" color="red" name="question-circle" v-if="post.type=='提问'" slot="dot"></IconFA>
+                    
+                    <span style="position:absolute; left:-4rem;top:0">{{formatTS(post.ts)}}</span>
                     <Post :post="post"></Post>
                 </TimelineItem>
             </transition-group>
@@ -48,7 +54,7 @@
     
 </style>
 <script type="text/javascript" >
-    import Post from "../post/timeline-post.vue"
+    import Post from "../../post/timeline-post.vue"
     
     class PostsFetcher{
         constructor(options){

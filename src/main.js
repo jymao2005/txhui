@@ -4,6 +4,8 @@ import Vue from 'vue'
 
 import store from "./store";
 
+window.$store = store;
+
 //console.log("store:", store);
 
 import iView  from "./iView.js"
@@ -33,7 +35,6 @@ Vue.directive("focus", {
 import utils from "./utils";
 Vue.prototype.$utils = utils;
 
-
 var vm = new Vue({ // eslint-disable-line no-new
   store,
   router,
@@ -48,8 +49,9 @@ var vm = new Vue({ // eslint-disable-line no-new
   methods:{
   }
   ,beforeCreate(){
-    global.$$vm = this;
+    window.$$vm = this;
+    console.log("create event")
   }
 })
-
-//global.$$vm = vm;
+console.log("vm created")
+window.$$vm = vm;

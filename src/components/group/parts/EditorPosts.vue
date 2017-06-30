@@ -1,19 +1,27 @@
 <template>
-    <EditorPosts :groupInfo="groupInfo" compName="TimelinePosts"></EditorPosts>
+    <div>
+        <Editor key="editor" v-model="newCnt" @typeChanged="typeChanged" :defaultType="postType"></Editor>
+        
+        <Component :is="compName" :key="groupInfo._id" :groupId="groupInfo._id" :newPost="newPost" ></Component>
+    </div>
 </template>
 
 <style lang="stylus">
     
 </style>
 <script type="text/javascript" >
-    import EditorPosts from "./parts/EditorPosts.vue"
+    import TimelinePosts from "./TimelinePosts.vue"
+    import NewestPosts from "./NewestPosts.vue"
+    import api from "../../../mixin/api.js"
     import {mapState, mapGetters} from "vuex"
     
     export default {
+        mixins:[api],
         components:{
-            EditorPosts
+            TimelinePosts,
+            NewestPosts
         },
-        props:["groupInfo"]
+        props:["groupInfo", "compName"]
         ,data(){
             return {
                 newCnt:"",
@@ -43,25 +51,15 @@
                 }
                 await this.$store.dispatch("user/ensureLogin")
                 
-                var {_id:id} = this.groupInfo;
-                var {name, figureUrl:creatorFigureUrl, _id:creatorId} = this.$store.state.user;
-                this.$http.post("/g/Post")
-                    .send({
-                        html:this.newCnt,
-                        creator:creatorId,
-                        creatorName:name
-                        , creatorFigureUrl:creatorFigureUrl
-                        , ts: this.progressTS //this.totalTS //s use progressTS here?
-                        , longTS: this.progressTS*1001+Math.floor(Math.random()*999)
-                        , groups:[id]
-                        , type:this.postType||"短笔记"
-                    }).then((res)=>{
-                        this.newCnt="";
-                        this.newPost = res.body;
-                        
-                    },(err)=>{
-                        //error msg here
-                    })
+                var {_id:groupId} = this.groupInfo;
+                this.newPost = await this.publishPost({
+                    html:this.newCnt,
+                    creator:this.$store.state.user
+                    , ts: this.progressTS //this.totalTS //s use progressTS here?
+                    , groupId
+                    , type:this.postType||"短笔记"
+                })
+                this.newCnt="";
             }
         },
         methods:{

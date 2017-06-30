@@ -1,7 +1,10 @@
 <template>
     <Dialog :visible="needLogin" v-if="needLogin" size="small" @visible-change="$event || cancelLogin()">
         <iframe @load="startCheck" frameborder="no" 
-                class="login" :src="url" ref="loginFrame" :name="iframeInitName"/>
+                class="login" :src="url" 
+                ref="loginFrame" 
+                :name="iframeInitName"
+                />
     </Dialog>
 </template>
 
@@ -23,6 +26,12 @@
                 "loginOnServer"
             ])
             ,startCheck(){
+                //store full path for mobile qq login callback
+                var path = this.$route.fullPath;
+                if(path.indexOf("/login")==-1){
+                    window.localStorage.setItem("lastPath", this.$route.fullPath);
+                }
+                
                 var node = this.$refs.loginFrame;
                 
                 var initName = this.iframeInitName;
@@ -58,6 +67,7 @@
                 return !hasLogin && needLogin;
             }
         }
+        
     }
 </script>
 

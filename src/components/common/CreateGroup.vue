@@ -25,8 +25,11 @@
 
 <script>
     import {mapState, mapMutations} from "vuex"
+    import api from "../../mixin/api";
+    
     export default {
         name:"CreateGroup",
+        mixins:[api],
         data(){
             return {
                 formData:{
@@ -76,19 +79,16 @@
                         }
                         this.createGroupDone(group);
                         this.$store.dispatch("user/subscrGroup", group._id)
-
-                        this.$http.post("/g/Post")
-                        .send({
-                            html:"<p>"+intro+"</p>",
-                            creator,
-                            creatorName,
-                            figureUrl,
-                            ts:0,
-                            longTS:Math.floor(Math.random()*999),
-                            groups:[group._id],
-                            type:"资料"
-                        }).end();
                         
+                        console.log(this)
+                        this.publishPost({
+                            html:"<p>"+intro+"</p>",
+                            creator:group.creator,
+                            ts:0,
+                            groupId:group._id,
+                            type:"资料"
+                        })
+
                         this.formData = {intro:"", name:""}
                         
                     },(err)=>{

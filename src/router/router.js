@@ -55,7 +55,21 @@ var router = new VueRouter({
             else {
                 return "/welcome"
             }
-        }}
+        }},
+        {
+            path:"/login", redirect(to){
+                setTimeout(()=>{
+                    var info = to.query;
+                    window.$store.dispatch("user/loginOnServer", info);
+                }, 100)
+
+                var path = window.localStorage.getItem("lastPath") || "/";
+                if(path && path.indexOf("/login")!==-1){
+                    path = "/"
+                }
+                return { path, query:{empty:true} };//query setting is not ok .....
+            }
+        }
     ]
 })
 

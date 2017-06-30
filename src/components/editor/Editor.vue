@@ -101,6 +101,7 @@
         &[placeholder]:empty:before {
             content: attr(placeholder);
             color: #bababa;
+            cursor:text;
         }
 
     .toolbar 
@@ -217,12 +218,13 @@
                 var cnt = node.innerHTML;
             },
             publish(){
-                var cnt = this.$refs.editArea.innerHTML.trim();
-                if(cnt && cnt.length>0){
-                    this.$emit("input", cnt);
+                var txt = this.$refs.editArea.textContent.trim();
+                if(!txt){
+                    this.$message("同学, 你还没有输入内容呢!");
+                    return;
                 }
-                console.log("publish()")
-                //this.$emit("publish", cnt);
+                var cnt = this.$refs.editArea.innerHTML.trim();
+                this.$emit("input", cnt);
             },
             go(){
                 //how to make go feature?

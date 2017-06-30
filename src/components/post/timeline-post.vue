@@ -1,9 +1,11 @@
 <template>
-    <div>
+    <div style="font-size:12px">
         <div v-if="!needModify">
             <header>
-                <span>{{formatTS(post.ts)}}</span>
-                <router-link :to="`/u/${post.creator}`" style="margin-left:2em">{{post.creatorName}}</router-link>     
+                <router-link :to="`/u/${post.creator}`" style="margin-left:0rem">
+                    <img :src="post.creatorFigureUrl" class="mini-figure"></img>
+                    {{post.creatorName}}
+                </router-link>     
             </header>
             <div class="post-content" v-html="post.html" style="font-size:1rem"></div>
             <footer style="color:grey;font-style:italic;border-bottom:1px dashed lightgrey">
@@ -47,6 +49,12 @@
         padding:.5em 0 1em;
         line-height:1.6;
     
+    .mini-figure
+        width:1.5rem;
+        height:1.5rem;
+        vertical-align:middle;
+        border-radius:.2rem;
+        margin-right:.5rem;
 </style>
 
 <style lang="stylus">
@@ -59,7 +67,7 @@
     import CommentDialog from "./comment-dialog.vue";
     import {mapGetters} from "vuex"
     export default {
-        props:["post"],
+        props:["post", "mode"],
         components:{CommentDialog},
         computed:{
             ...mapGetters("user", {
@@ -81,12 +89,35 @@
                     _id, name
                 }
             },
+            vote(){
+                return this.post.votes.up || {};
+            },
             cmds(){
                 console.log("cmds changed")
                 var cmds = [{
                         label:"赞",
-                        onClick(){
-                            
+                        num: this.vote.num || 0,
+                        async onClick(){
+                            try{
+                                await this.$store.dispatch("user/ensureLogin");
+                                var res = await this.$http.post("/post/vote-up")
+                                                    .send({
+                                                            voter:this.curUserId
+                                                            , postId:this.post._id
+                                                    })
+                                if(res.body.n >0){
+                                    let up = this.vote;
+                                    up.num++;
+                                    console.log("curUserId", this.curUserId)
+                                    up.voters.push(this.curUserId)
+                                }
+                                else {
+                                    this.$message({message:"不能再赞了, 你已经赞过了.", type:"warning"})
+                                }
+                            }
+                            catch(e){
+                                console.log(e);
+                            }
                         }
                     },
                     {
